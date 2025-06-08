@@ -4,158 +4,251 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SMS Spam Classifier</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
-      --bg-light: #f0f8ff;       /* AliceBlue background in light mode */
-      --fg-light: #333;
+      --bg-light: #f8f9fa; --fg-light: #343a40;
       --container-bg-light: #ffffff;
-      --btn-bg-light: #007BFF;
-      --btn-hover-light: #0056b3;
-
-      --bg-dark: #2b2b2b;
-      --fg-dark: #eee;
-      --container-bg-dark: #3a3a3a;
-      --btn-bg-dark: #1e90ff;
-      --btn-hover-dark: #1c7ed6;
-
+      --btn-bg-light: #4e73df; --btn-hover-light: #2e59d9;
+      --accent-light: #4e73df; --shadow-light: rgba(0, 0, 0, 0.1);
+      --bg-dark: #1a1a2e; --fg-dark: #e6e6e6;
+      --container-bg-dark: #16213e;
+      --btn-bg-dark: #0f3460; --btn-hover-dark: #1a56a0;
+      --accent-dark: #e94560; --shadow-dark: rgba(0, 0, 0, 0.3);
       --transition-speed: 0.3s;
-      --border-radius: 8px;
-      --max-width: 600px;
+      --border-radius: 12px;
+      --max-width: 650px;
       font-size: 16px;
     }
     [data-theme="light"] {
-      --bg: var(--bg-light);
-      --fg: var(--fg-light);
+      --bg: var(--bg-light); --fg: var(--fg-light);
       --container-bg: var(--container-bg-light);
-      --btn-bg: var(--btn-bg-light);
-      --btn-hover: var(--btn-hover-light);
+      --btn-bg: var(--btn-bg-light); --btn-hover: var(--btn-hover-light);
+      --accent: var(--accent-light); --shadow: var(--shadow-light);
     }
     [data-theme="dark"] {
-      --bg: var(--bg-dark);
-      --fg: var(--fg-dark);
+      --bg: var(--bg-dark); --fg: var(--fg-dark);
       --container-bg: var(--container-bg-dark);
-      --btn-bg: var(--btn-bg-dark);
-      --btn-hover: var(--btn-hover-dark);
+      --btn-bg: var(--btn-bg-dark); --btn-hover: var(--btn-hover-dark);
+      --accent: var(--accent-dark); --shadow: var(--shadow-dark);
     }
-    *, *::before, *::after { box-sizing: border-box; }
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0; padding: 0;
+    }
     body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Roboto', sans-serif;
+      font-family: 'Poppins', sans-serif;
       background: var(--bg);
       color: var(--fg);
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      padding: 20px;
       transition: background var(--transition-speed), color var(--transition-speed);
+      line-height: 1.6;
     }
     .container {
-      background: var(--container-bg);
-      width: 90%;
-      max-width: var(--max-width);
-      padding: 20px;
-      border-radius: var(--border-radius);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-      transition: background var(--transition-speed), color var(--transition-speed);
       position: relative;
+      background: var(--container-bg);
+      width: 100%;
+      max-width: var(--max-width);
+      padding: 2rem;
+      border-radius: var(--border-radius);
+      box-shadow: 0 10px 30px var(--shadow);
+      transition: all var(--transition-speed);
+      overflow: hidden;
+    }
+    .container::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 7px;
+      background: linear-gradient(90deg, var(--accent), var(--btn-bg));
+    }
+    .theme-toggle {
+      position: absolute; top: 20px; right: 20px;
+      background: var(--btn-bg);
+      border: none;
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.2rem;
+      color: white;
+      transition: all var(--transition-speed);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+    .theme-toggle:hover {
+      background-color: var(--btn-hover);
+      transform: rotate(30deg);
     }
     h1 {
       text-align: center;
-      margin-bottom: 20px;
-      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      font-size: clamp(1.8rem, 4vw, 2.2rem);
+      color: var(--accent);
     }
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 500;
-    }
+    /* <-- Restored styling for textarea --> */
     textarea {
       width: 100%;
-      min-height: 120px;
-      padding: 10px;
+      min-height: 150px;
+      padding: 1rem;
       font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+      border: 2px solid #ddd;
+      border-radius: var(--border-radius);
       resize: vertical;
-      margin-bottom: 15px;
-      background: var(--bg);
+      margin-bottom: 1.5rem;
+      background: var(--container-bg);
       color: var(--fg);
-      transition: border var(--transition-speed), background var(--transition-speed), color var(--transition-speed);
+      transition: all var(--transition-speed);
+      font-family: 'Poppins', sans-serif;
     }
     textarea:focus {
-      border-color: var(--btn-bg);
+      border-color: var(--accent);
       outline: none;
+      box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.25);
     }
-    button {
+    /* <-- Restored styling for submit button --> */
+    button[type="submit"] {
       width: 100%;
-      padding: 12px;
-      font-size: 1rem;
+      padding: 1rem;
+      font-size: 1.1rem;
       font-weight: 600;
-      color: #fff;
+      color: white;
       background-color: var(--btn-bg);
       border: none;
       border-radius: var(--border-radius);
       cursor: pointer;
-      transition: background var(--transition-speed), transform 0.2s ease;
+      transition: all var(--transition-speed);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
     }
-    button:hover {
+    button[type="submit"]:hover {
       background-color: var(--btn-hover);
-      transform: translateY(-2px);
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px var(--shadow);
     }
-    button:active {
+    button[type="submit"]:active {
       transform: translateY(0);
     }
-    .theme-toggle {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      font-size: 1.2rem;
-      color: var(--fg);
-      transition: color var(--transition-speed);
+    .character-count {
+      text-align: right;
+      margin-top: -1rem;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      color: #6c757d;
     }
-    @media (min-width: 600px) {
-      .container { padding: 30px; }
+    .result {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      border-radius: var(--border-radius);
+      background-color: rgba(78, 115, 223, 0.1);
+      border-left: 4px solid var(--accent);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: fadeIn 0.5s ease;
     }
-    @media (min-width: 900px) {
-      h1 { font-size: 2.2rem; }
-      button { padding: 14px; font-size: 1.1rem; }
+    .result.spam {
+      background-color: rgba(233, 69, 96, 0.1);
+      border-left-color: var(--accent);
+    }
+    .result.ham {
+      background-color: rgba(46, 204, 113, 0.1);
+      border-left-color: #2ecc71;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .loader {
+      display: none;
+      width: 24px; height: 24px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    @media (max-width: 480px) {
+      .theme-toggle { top: 15px; right: 15px; width: 35px; height: 35px; font-size: 1rem; }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <button class="theme-toggle" aria-label="Toggle theme">🌓</button>
-    <h1>📩 SMS Spam Classifier</h1>
-    <form method="POST" action="/predict">
-      <label for="message">Enter your message:</label>
-      <textarea id="message" name="message" required>{{ request.form.get('message', '') }}</textarea>
-      <button type="submit">Predict</button>
+    <button class="theme-toggle" aria-label="Toggle theme">
+      <i class="fas fa-moon"></i>
+    </button>
+    
+    <h1><i class="fas fa-sms"></i> SMS Spam Classifier</h1>
+    
+    <form method="POST" action="/predict" id="classifier-form">
+      <label for="message"><b>Enter your message:</b></label>
+      <textarea id="message" name="message" required maxlength="500"
+        placeholder="Type or paste an SMS message here...">{{ request.form.get('message','') }}</textarea>
+      <div class="character-count"><span id="char-count">0</span>/500</div>
+      <button type="submit" id="submit-btn">
+        <span id="btn-text">Analyze Message</span>
+        <div class="loader" id="loader"></div>
+      </button>
     </form>
+    
     {% if prediction_text %}
-      <h3>{{ prediction_text }}</h3>
+    <div class="result {% if 'spam' in prediction_text.lower() %}spam{% else %}ham{% endif %}">
+      <i class="fas {% if 'spam' in prediction_text.lower() %}fa-exclamation-triangle{% else %}fa-check-circle{% endif %}"></i>
+      <span>{{ prediction_text }}</span>
+    </div>
     {% endif %}
   </div>
 
   <script>
+    // Theme toggle logic
     const toggleBtn = document.querySelector('.theme-toggle');
     const root = document.documentElement;
-
+    const themeIcon = toggleBtn.querySelector('i');
     const stored = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     if (stored) root.setAttribute('data-theme', stored);
     else root.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-
+    function updateIcon() {
+      themeIcon.className = root.getAttribute('data-theme') === 'light' 
+        ? 'fas fa-moon' : 'fas fa-sun';
+    }
+    updateIcon();
     toggleBtn.addEventListener('click', () => {
-      const current = root.getAttribute('data-theme');
-      const next = current === 'light' ? 'dark' : 'light';
+      const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
       root.setAttribute('data-theme', next);
       localStorage.setItem('theme', next);
+      updateIcon();
     });
+
+    // Character counter
+    const textarea = document.getElementById('message');
+    const charCount = document.getElementById('char-count');
+    textarea.addEventListener('input', () => {
+      charCount.textContent = textarea.value.length;
+      textarea.style.height = 'auto';
+      textarea.style.height = textarea.scrollHeight + 'px';
+    });
+    charCount.textContent = textarea.value.length;
+
+    // Submission loading state
+    document.getElementById('classifier-form')
+      .addEventListener('submit', () => {
+        document.getElementById('btn-text').textContent = 'Analyzing...';
+        document.getElementById('loader').style.display = 'block';
+        document.getElementById('submit-btn').disabled = true;
+      });
   </script>
 </body>
 </html>
