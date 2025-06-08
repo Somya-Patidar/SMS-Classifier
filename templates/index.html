@@ -1,58 +1,161 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <title>SMS Spam Classifier</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SMS Spam Classifier</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-light: #f0f8ff;       /* AliceBlue background in light mode */
+      --fg-light: #333;
+      --container-bg-light: #ffffff;
+      --btn-bg-light: #007BFF;
+      --btn-hover-light: #0056b3;
 
-        .container {
-            text-align: center;
-            background-color: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
+      --bg-dark: #2b2b2b;
+      --fg-dark: #eee;
+      --container-bg-dark: #3a3a3a;
+      --btn-bg-dark: #1e90ff;
+      --btn-hover-dark: #1c7ed6;
 
-        textarea {
-            width: 100%;
-            padding: 10px;
-            font-size: 16px;
-            resize: none;
-        }
-
-        button {
-            margin-top: 10px;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        h3 {
-            margin-top: 20px;
-            color: #333;
-        }
-    </style>
+      --transition-speed: 0.3s;
+      --border-radius: 8px;
+      --max-width: 600px;
+      font-size: 16px;
+    }
+    [data-theme="light"] {
+      --bg: var(--bg-light);
+      --fg: var(--fg-light);
+      --container-bg: var(--container-bg-light);
+      --btn-bg: var(--btn-bg-light);
+      --btn-hover: var(--btn-hover-light);
+    }
+    [data-theme="dark"] {
+      --bg: var(--bg-dark);
+      --fg: var(--fg-dark);
+      --container-bg: var(--container-bg-dark);
+      --btn-bg: var(--btn-bg-dark);
+      --btn-hover: var(--btn-hover-dark);
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Roboto', sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      transition: background var(--transition-speed), color var(--transition-speed);
+    }
+    .container {
+      background: var(--container-bg);
+      width: 90%;
+      max-width: var(--max-width);
+      padding: 20px;
+      border-radius: var(--border-radius);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      transition: background var(--transition-speed), color var(--transition-speed);
+      position: relative;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 1.8rem;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      resize: vertical;
+      margin-bottom: 15px;
+      background: var(--bg);
+      color: var(--fg);
+      transition: border var(--transition-speed), background var(--transition-speed), color var(--transition-speed);
+    }
+    textarea:focus {
+      border-color: var(--btn-bg);
+      outline: none;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #fff;
+      background-color: var(--btn-bg);
+      border: none;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: background var(--transition-speed), transform 0.2s ease;
+    }
+    button:hover {
+      background-color: var(--btn-hover);
+      transform: translateY(-2px);
+    }
+    button:active {
+      transform: translateY(0);
+    }
+    .theme-toggle {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 1.2rem;
+      color: var(--fg);
+      transition: color var(--transition-speed);
+    }
+    @media (min-width: 600px) {
+      .container { padding: 30px; }
+    }
+    @media (min-width: 900px) {
+      h1 { font-size: 2.2rem; }
+      button { padding: 14px; font-size: 1.1rem; }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>📩 SMS Spam Classifier</h1>
-        <form method="POST" action="/predict">
-            <label for="message">Enter your message:</label><br><br>
-            <textarea name="message" rows="5" cols="50" required>{{ request.form.get('message', '') }}</textarea><br><br>
-            <button type="submit">Predict</button>
-        </form>
+  <div class="container">
+    <button class="theme-toggle" aria-label="Toggle theme">🌓</button>
+    <h1>📩 SMS Spam Classifier</h1>
+    <form method="POST" action="/predict">
+      <label for="message">Enter your message:</label>
+      <textarea id="message" name="message" required>{{ request.form.get('message', '') }}</textarea>
+      <button type="submit">Predict</button>
+    </form>
+    {% if prediction_text %}
+      <h3>{{ prediction_text }}</h3>
+    {% endif %}
+  </div>
 
-        {% if prediction_text %}
-            <h3>{{ prediction_text }}</h3>
-        {% endif %}
-    </div>
+  <script>
+    const toggleBtn = document.querySelector('.theme-toggle');
+    const root = document.documentElement;
+
+    const stored = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (stored) root.setAttribute('data-theme', stored);
+    else root.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+
+    toggleBtn.addEventListener('click', () => {
+      const current = root.getAttribute('data-theme');
+      const next = current === 'light' ? 'dark' : 'light';
+      root.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    });
+  </script>
 </body>
 </html>
